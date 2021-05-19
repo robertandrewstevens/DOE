@@ -1,6 +1,11 @@
-https://www.itl.nist.gov/div898/handbook/pri/section4/pri41.htm
+---
+title: "5.4.1. What are the steps in a DOE analysis?"
+author: "Robert A. Stevens"
+date: "`r Sys.Date()`"
+output: github_document
+---
 
-# 5.4.1. What are the steps in a DOE analysis?
+https://www.itl.nist.gov/div898/handbook/pri/section4/pri41.htm
 
 *General flowchart for analyzing DOE data*
 
@@ -14,7 +19,9 @@ Flowchart for analyzing DOE data
 
 The following are the basic steps in a DOE analysis.
 
-1. Look at the data. Examine it for outliers, typos and obvious problems. Construct as many graphs as you can to get the big picture.
+1. Look at the data
+    + Examine it for outliers, typos and obvious problems
+    + Construct as many graphs as you can to get the big picture
 
 - Response distributions (histograms, box plots, etc.)
 
@@ -50,4 +57,3 @@ The following are the basic steps in a DOE analysis.
 *Flowchart is a guideline, not a hard-and-fast rule*
 
 Note: The above flowchart and sequence of steps should not be regarded as a "hard-and-fast rule" for analyzing all DOE's. Different analysts may prefer a different sequence of steps and not all types of experiments can be analyzed with one set procedure. There still remains some art in both the design and the analysis of experiments, which can only be learned from experience. In addition, the role of engineering judgment should not be underestimated.
-

@@ -1,6 +1,11 @@
-https://www.itl.nist.gov/div898/handbook/pri/section4/pri43.htm
+---
+title: "5.4.3. How to model DOE data"
+author: "Robert A. Stevens"
+date: "`r Sys.Date()`"
+output: github_document
+---
 
-# 5.4.3. How to model DOE data
+https://www.itl.nist.gov/div898/handbook/pri/section4/pri43.htm
 
 *DOE models should be consistent with the goal of the experiment*
 
@@ -11,16 +16,13 @@ In general, the trial model that will be fit to DOE data should be consistent wi
 Models were given earlier for comparative designs:
 
 - completely randomized designs
-
-https://www.itl.nist.gov/div898/handbook/pri/section3/pri331.htm#Model%20for%20a
+    + https://www.itl.nist.gov/div898/handbook/pri/section3/pri331.htm#Model%20for%20a
 
 - randomized block designs
-
-https://www.itl.nist.gov/div898/handbook/pri/section3/pri332.htm#Model%20for%20a
+    + https://www.itl.nist.gov/div898/handbook/pri/section3/pri332.htm#Model%20for%20a
 
 - Latin square designs
-
-https://www.itl.nist.gov/div898/handbook/pri/section3/pri3321.htm#Latin%20square
+    + https://www.itl.nist.gov/div898/handbook/pri/section3/pri3321.htm#Latin%20square
 
 *Full factorial designs*
 
@@ -51,5 +53,3 @@ https://www.itl.nist.gov/div898/handbook/pri/section3/pri336.htm
 Of course, as in all cases of model fitting, residual analysis and other tests of model fit are used to confirm or adjust models, as needed:
 
 https://www.itl.nist.gov/div898/handbook/pri/section4/pri44.htm
-
-

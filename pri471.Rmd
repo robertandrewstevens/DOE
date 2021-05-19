@@ -1,6 +1,11 @@
-https://www.itl.nist.gov/div898/handbook/pri/section4/pri471.htm
+---
+title: "5.4.7.1. Full factorial example"
+author: "Robert A. Stevens"
+date: "`r Sys.Date()`"
+output: github_document
+---
 
-# 5.4.7.1. Full factorial example
+https://www.itl.nist.gov/div898/handbook/pri/section4/pri471.htm
 
 ## Data Source
 
@@ -98,17 +103,15 @@ Plot the response variable 	We start by plotting the response data several ways 
 
 First, we look at the distribution of the response variable regardless of factor levels by generating the following four plots.
 
-1. The first plot is a normal probability plot of the response variable. The red line is the theoretical normal distribution.
+1. The first plot is a normal probability plot of the response variable
+    + The red line is the theoretical normal distribution
+    + https://www.itl.nist.gov/div898/handbook/eda/section3/normprpl.htm
 
-https://www.itl.nist.gov/div898/handbook/eda/section3/normprpl.htm
+2. The second plot is a box plot of the response variable
+    + https://www.itl.nist.gov/div898/handbook/eda/section3/boxplot.htm
 
-2. The second plot is a box plot of the response variable.
-
-https://www.itl.nist.gov/div898/handbook/eda/section3/boxplot.htm
-
-3. The third plot is a histogram of the response variable.
-
-https://www.itl.nist.gov/div898/handbook/eda/section3/histogra.htm
+3. The third plot is a histogram of the response variable
+    + https://www.itl.nist.gov/div898/handbook/eda/section3/histogra.htm
 
 4. The fourth plot is the response versus the run order. 
 
@@ -397,5 +400,4 @@ If we had assumed that three-factor and higher interactions were negligible befo
 
 *Natural log transformation*
 
-Finally, we note that many analysts might prefer to adopt a natural logarithm transformation (i.e., use ln(Y)) as the response instead of using a Box-Cox transformation with an exponent of 0.2. The natural logarithm transformation corresponds to an exponent of λ = 0 in the Box-Cox graph. 
-    
+Finally, we note that many analysts might prefer to adopt a natural logarithm transformation (i.e., use ln(Y)) as the response instead of using a Box-Cox transformation with an exponent of 0.2. The natural logarithm transformation corresponds to an exponent of λ = 0 in the Box-Cox graph.

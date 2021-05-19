@@ -1,6 +1,11 @@
-https://www.itl.nist.gov/div898/handbook/pri/section4/pri472.htm
+---
+title: "5.4.7.2. Fractional factorial example"
+author: "Robert A. Stevens"
+date: "`r Sys.Date()`"
+output: github_document
+---
 
-# 5.4.7.2. Fractional factorial example
+https://www.itl.nist.gov/div898/handbook/pri/section4/pri472.htm
 
 ## A "Catapult" Fractional Factorial Experiment
 
@@ -352,4 +357,3 @@ Main effects plot
 *"Confirmation" runs were successful*
 
 In the confirmatory runs that followed the experiment, the team was successful at hitting all three targets, but did not hit them all five times. The model discovery and fitting process, as illustrated in this analysis, is often an iterative process.
-

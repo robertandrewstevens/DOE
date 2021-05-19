@@ -1,0 +1,35 @@
+5.4.7. Examples of Designed Experiments
+================
+Robert A. Stevens
+2021-05-19
+
+<https://www.itl.nist.gov/div898/handbook/pri/section4/pri47.htm>
+
+*Three detailed examples*
+
+Perhaps one of the best ways to illustrate how to analyze data from a
+designed experiment is to work through a detailed example, explaining
+each step in the analysis.
+
+Detailed analyses are presented for three basic types of designed
+experiments:
+
+  - A full factorial experiment
+      - <https://www.itl.nist.gov/div898/handbook/pri/section4/pri471.htm>
+  - A fractional factorial experiment
+      - <https://www.itl.nist.gov/div898/handbook/pri/section4/pri472.htm>
+  - A response surface experiment
+      - <https://www.itl.nist.gov/div898/handbook/pri/section4/pri473.htm>
+
+*Software*
+
+Most analyses of designed experiments are performed by statistical
+software packages. Good statistical software enables the analyst to view
+graphical displays, build models, and test assumptions. Occasionally,
+the goals of the experiment can be achieved by simply examining
+appropriate graphical displays of the experimental responses. In other
+cases, a satisfactory model has to be fit in order to determine the most
+significant factors or the optimal contours of the response surface. In
+any case, the software will perform the appropriate calculations as long
+as the analyst knows what to request and how to interpret the program
+outputs.

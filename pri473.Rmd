@@ -1,6 +1,11 @@
-https://www.itl.nist.gov/div898/handbook/pri/section4/pri473.htm
+---
+title: "5.4.7.3. Response surface model example"
+author: "Robert A. Stevens"
+date: "`r Sys.Date()`"
+output: github_document
+---
 
-# 5.4.7.3. Response surface model example
+https://www.itl.nist.gov/div898/handbook/pri/section4/pri473.htm
 
 ## Data Source
 
@@ -8,7 +13,7 @@ https://www.itl.nist.gov/div898/handbook/pri/section4/pri473.htm
 
 https://www.itl.nist.gov/div898/handbook/pri/section3/pri3361.htm
 
-This example uses experimental data published in Czitrom and Spagon, (1997), Statistical Case Studies for Industrial Process Improvement:
+This example uses experimental data published in Czitrom and Spagon, (1997), *Statistical Case Studies for Industrial Process Improvement*:
 
 https://www.itl.nist.gov/div898/handbook/pri/section8/pri8.htm#Czitrom,%20V.,%20and
 
@@ -90,8 +95,8 @@ The steps for fitting a response surface (second-order or quadratic) model are a
 
 4. Generate diagnostic residual plots (histograms, box plots, normal plots, etc.) for the model selected
 
-5. Examine the fitted model plot, interaction plots, and ANOVA statistics (R2, adjusted R2, lack-of-fit test, etc.)
-    +  Use all these plots and statistics to determine whether the model fit is satisfactory
+5. Examine the fitted model plot, interaction plots, and ANOVA statistics (R^2, adjusted R^2, lack-of-fit test, etc.)
+    + Use all these plots and statistics to determine whether the model fit is satisfactory
 
 6. Use contour plots of the response surface to explore the effect of changing factor levels on the response
 
@@ -308,9 +313,13 @@ Contour plot showing both response variables
 
 The response surface models fit to (coded) Uniformity and Stress were:
 
+```
 Uniformity = 5.93 - 1.91*Pressure - 0.22*H2/WF6 + 1.70*Pressure*H2/WF6
+```
 
+```
 Stress = 7.73 + 0.74*Pressure + 0.50*H2/WF6 - 0.49*Pressure^2
+```
 
 *Trade-offs are often needed for multiple responses*
 
@@ -323,4 +332,3 @@ In this case, the experimenters chose to focus on optimizing Uniformity while ke
 *Confirmation runs validated the model projections*
 
 A set of 16 verification runs at the chosen conditions confirmed that all goals, except those for the Stress response, were met by this set of process settings.
-
