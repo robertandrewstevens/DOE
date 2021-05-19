@@ -1,0 +1,54 @@
+5.4. Analysis of DOE data
+================
+Robert A. Stevens
+2021-05-19
+
+<https://www.itl.nist.gov/div898/handbook/pri/section4/pri4.htm>
+
+*Contents of this section*
+
+Assuming you have a starting model that you want to fit to your
+experimental data and the experiment was designed correctly for your
+objective, most DOE software packages will analyze your DOE data. This
+section will illustrate how to analyze DOE’s by first going over the
+generic basic steps and then showing software examples. The contents of
+the section are:
+
+  - DOE analysis steps:
+      - <https://www.itl.nist.gov/div898/handbook/pri/section4/pri41.htm>
+  - Plotting DOE data:
+      - <https://www.itl.nist.gov/div898/handbook/pri/section4/pri42.htm>
+  - Modeling DOE data:
+      - <https://www.itl.nist.gov/div898/handbook/pri/section4/pri43.htm>
+  - Testing and revising DOE models:
+      - <https://www.itl.nist.gov/div898/handbook/pri/section4/pri44.htm>
+  - Interpreting DOE results:
+      - <https://www.itl.nist.gov/div898/handbook/pri/section4/pri45.htm>
+  - Confirming DOE results:
+      - <https://www.itl.nist.gov/div898/handbook/pri/section4/pri46.htm>
+  - DOE examples:
+    <https://www.itl.nist.gov/div898/handbook/pri/section4/pri47.htm>
+      - Full factorial example:
+        <https://www.itl.nist.gov/div898/handbook/pri/section4/pri471.htm>
+      - Fractional factorial example:
+        <https://www.itl.nist.gov/div898/handbook/pri/section4/pri472.htm>
+      - Response surface example:
+        <https://www.itl.nist.gov/div898/handbook/pri/section4/pri473.htm>
+
+*Prerequisite statistical tools and concepts needed for DOE analyses*
+
+The examples in this section assume the reader is familiar with the
+concepts of
+
+  - ANOVA tables (see Chapter 3 or Chapter 7)
+      - <https://www.itl.nist.gov/div898/handbook/ppc/section2/ppc23.htm>
+      - <https://www.itl.nist.gov/div898/handbook/prc/section4/prc42.htm>
+  - p-values:
+      - <https://www.itl.nist.gov/div898/handbook/prc/section1/prc131.htm>
+  - Residual analysis:
+      - <https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm#resdef>
+  - Model Lack of Fit tests:
+      - <https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm>
+  - Data transformations for normality and linearity
+      - <https://www.itl.nist.gov/div898/handbook/eda/section3/eda336.htm>
+      - <https://www.itl.nist.gov/div898/handbook/eda/section3/eda335.htm>
