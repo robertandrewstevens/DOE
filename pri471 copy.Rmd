@@ -1,0 +1,703 @@
+---
+title: "5.4.7.1. Full factorial example"
+author: "Robert A. Stevens"
+date: "`r Sys.Date()`"
+output: github_document
+---
+
+```{r, echo=FALSE}
+knitr::opts_chunk$set(
+  comment = NA, 
+  echo = TRUE, 
+  warning = FALSE, 
+  message = FALSE, 
+  fig.width = 11, 
+  fig.height = 8.5,
+  error = TRUE
+)
+
+options(width = 120)
+```
+
+https://www.itl.nist.gov/div898/handbook/pri/section4/pri471.htm
+
+## Data Source
+
+*This example uses data from a NIST high performance ceramics experiment*
+
+This data set was taken from an experiment that was performed a few years ago at NIST by Said Jahanmir of the Ceramics Division in the Material Science and Engineering Laboratory. The original analysis was performed primarily by Lisa Gill of the Statistical Engineering Division. The example shown here is an independent analysis of a modified portion of the original data set.
+
+The original data set was part of a high performance ceramics experiment with the goal of characterizing the effect of grinding parameters on sintered reaction-bonded silicon nitride, reaction bonded silicone nitride, and sintered silicon nitride.
+
+Only modified data from the first of the three ceramic types (sintered reaction-bonded silicon nitride) will be discussed in this illustrative example of a full factorial data analysis.
+
+The reader can download the data as a text file:
+
+https://www.itl.nist.gov/div898/handbook/datasets/CERAMIC.DAT
+
+## Description of Experiment: Response and Factors
+
+*Response and factor variables*
+
+Purpose: To determine the effect of machining factors on ceramic strength
+Response variable = mean (over 15 repetitions) of the ceramic strength
+Number of observations = 32 (a complete 25 factorial design)
+
+- Response Variable Y = Mean (over 15 reps) of Ceramic Strength
+
+- Factor 1 = Table Speed (2 levels: slow (0.025 m/s) and fast (0.125 m/s))
+
+- Factor 2 = Down Feed Rate (2 levels: slow (0.05 mm) and fast (.125 mm))
+
+- Factor 3 = Wheel Grit (2 levels: 140/170 and 80/100)
+
+- Factor 4 = Direction (2 levels: longitudinal and transverse)
+
+- Factor 5 = Batch (2 levels: 1 and 2) 
+
+Since two factors were qualitative (direction and batch) and it was reasonable to expect monotone effects from the quantitative factors, no centerpoint runs were included.
+
+*The data*
+
+The design matrix, with measured ceramic strength responses, appears below. The actual randomized run order is given in the last column. (The interested reader may download the data as a text file.)
+
+https://www.itl.nist.gov/div898/handbook/datasets/ceramic.dat
+
+```{r}
+ceramic <- read.csv("ceramic.csv")
+names(ceramic) <- c("speed", "rate", "grit", "direction", "batch", "strength", "order")
+ceramic
+```
+
+## Analysis of the Experiment
+
+*Five basic steps*
+
+The experimental data will be analyzed following the previously described five basic steps:
+
+https://www.itl.nist.gov/div898/handbook/pri/section4/pri41.htm#DOE%20Analysis
+
+The analyses shown in this page can be generated using R code:
+
+https://www.itl.nist.gov/div898/handbook/pri/section4/pri471.r
+
+## Step 1: Look at the data
+
+Plot the response variable 	We start by plotting the response data several ways to see if any trends or anomalies appear that would not be accounted for by the standard linear response models.
+
+First, we look at the distribution of the response variable regardless of factor levels by generating the following four plots.
+
+1. The first plot is a normal probability plot of the response variable
+    + The red line is the theoretical normal distribution
+    + https://www.itl.nist.gov/div898/handbook/eda/section3/normprpl.htm
+
+2. The second plot is a box plot of the response variable
+    + https://www.itl.nist.gov/div898/handbook/eda/section3/boxplot.htm
+
+3. The third plot is a histogram of the response variable
+    + https://www.itl.nist.gov/div898/handbook/eda/section3/histogra.htm
+
+4. The fourth plot is the response versus the run order. 
+
+```{r, fig.width=8.5, fig.height=8.5}
+## Generate four plots
+# par(bg = rgb(1, 1, 0.8), mfrow = c(2, 2))
+par(mfrow = c(2, 2))
+
+qqnorm(ceramic$strength)
+qqline(ceramic$strength, col = 2)
+
+boxplot(ceramic$strength, horizontal = TRUE, main = "Box Plot", xlab = "Strength")
+
+hist(ceramic$strength, main = "Histogram", xlab = "Strength")
+
+plot(ceramic$order, ceramic$strength, xlab = "Actual Run Order", ylab = "Strength", main = "Run Order Plot")
+
+par(mfrow=c(1,1))
+```
+
+**4-plot: normal probability plot, box plot, histogram, run-order plot**
+
+Clearly there is "structure" that we hope to account for when we fit a response model. For example, the response variable is separated into two roughly equal-sized clumps in the histogram. The first clump is centered approximately around the value 450 while the second clump is centered approximately around the value 650. As hoped for, the run-order plot does not indicate a significant time effect.
+
+*Box plots of response by factor variables*
+
+Next, we look at box plots of the response for each factor.
+
+```{r}
+# par(bg = rgb(1, 1, 0.8), mfrow = c(2, 3))
+par(mfrow = c(2, 3))
+
+boxplot(strength ~ speed, data = ceramic, main = "Strength by Table Speed", xlab = "Table Speed", ylab = "Strength")
+
+boxplot(strength ~ rate, data = ceramic, main = "Strength by Feed Rate", xlab = "Feed Rate", ylab = "Strength")
+
+boxplot(strength ~ grit, data = ceramic, main = "Strength by Wheel Grit", xlab = "Wheel Grit", ylab = "Strength")
+
+boxplot(strength ~ direction, data = ceramic, main = "Strength by Direction", xlab = "Direction", ylab = "Strength")
+
+boxplot(strength ~ batch, data = ceramic, main = "Strength by Batch", xlab = "Batch", ylab = "Strength")
+
+par(mfrow = c(1, 1))
+```
+
+**box plots of response for each factor**
+
+Several factors, most notably "Direction" followed by "Batch" and possibly "Wheel Grit", appear to change the average response level.
+
+## Step 2: Create the theoretical model
+
+*Theoretical model: assume all four-factor and higher interaction terms are not significant*
+
+For a 2^5 full factorial experiment we can fit a model containing a mean term, five main effect terms, ten two-factor interaction terms, ten three-factor interaction terms, five four-factor interaction terms, and a five-factor interaction term (32 parameters). However, we start by assuming all four-factor and higher interaction terms are non-existent. It's very rare for such high-order interactions to be significant, and they are very difficult to interpret from an engineering viewpoint. The assumption allows us to accumulate the sums of squares for these terms and use them to estimate an error term. We start with a theoretical model with 26 unknown constants, hoping the data will clarify which of these are the significant main effects and interactions we need for a final model.
+
+## Step 3: Fit model to the data
+
+*Results from fitting up to and including third-order interaction terms*
+
+The ANOVA table for the 26-parameter model (intercept not shown) follows.
+
+```{r}
+# Summary of Fit statistics not longer given by 'aov'?
+# Write a function if keep using this
+lm1 <- lm(strength ~ (speed + rate + grit + direction + batch)^3, data = ceramic)
+sum_lm1 <- summary(lm1)
+cat("Summary of Fit\n")
+cat("  RSquare =", sum_lm1$r.squared, "\n")
+cat("  RSquare Adj =", sum_lm1$adj.r.squared, "\n")
+cat("  Root Mean Square Error =", sum_lm1$sigma, "\n")
+cat("  Mean of Response =", mean(ceramic$strength, na.rm = TRUE), "\n")
+cat("  Observations =", dim(ceramic)[1])
+```
+
+```{r}
+# Fit a model with up to third order interactions.
+aov1 <- aov(strength ~ (speed + rate + grit + direction + batch)^3, data = ceramic)
+summary(aov1)
+```
+
+This fit has a large R^2 and adjusted R^2, but the high number of large (> 0.10) p-values (in the "Prob>F" column) makes it clear that the model has many unnecessary terms.
+
+*Stepwise regression*
+
+Starting with the 26 terms, we use stepwise regression to eliminate unnecessary terms. By a combination of stepwise regression and the removal of remaining terms with a p-value larger than 0.05, we quickly arrive at a model with an intercept and 12 significant effect terms.
+
+```{r}
+# Stepwise regression based on AIC
+sreg <- step(aov1, direction = "backward")
+summary(sreg)
+```
+
+*Results from fitting the 12-term model*
+
+                Summary of Fit
+               RSquare 0.989114
+               RSquare Adj 0.982239
+         Root Mean Square Error 14.96346
+          Mean of Response 546.8959
+         Observations (or Sum Wgts) 32
+
+```{r}
+# Remove non-significant terms from the stepwise model
+redmod <- aov(formula = strength ~ speed + rate + grit + direction + 
+               batch + speed:rate + speed:grit + speed:direction +  
+               rate:direction + grit:direction + direction:batch + 
+               speed:rate:direction, data = ceramic)
+summary(redmod)
+```
+
+```{r}
+# Print adjusted R squared
+summary.lm(redmod)$adj.r.squared
+```
+
+*Normal plot of the effects*
+
+Non-significant effects should effectively follow an approximately normal distribution with the same location and scale. Significant effects will vary from this normal distribution. Therefore, another method of determining significant effects is to generate a normal probability plot of all 31 effects. The effects that deviate substantially from the straight line fit to the data are considered significant. Although this is a somewhat subjective criteria, it tends to work well in practice. It is helpful to use both the numerical output from the fit and graphical techniques such as the normal probability plot in deciding which terms to keep in the model.
+
+A normal probability plot of the effects is shown below. (To reduce the scale of the y-axis, the largest two effects, X4: Direction and X5: Batch, are not shown on the plot. In addition, these two effects were not used to compute the normal reference line.) The effects we consider to be significant are labeled. In this case, we have arrived at the exact same 12 terms by looking at the normal probability plot as we did from the stepwise regression.
+
+```{r, fig.width=6.5, fig.height=6.5}
+# Fit a model with all effects.
+full <- aov(strength ~ (speed + rate + grit + direction + batch)^5, data = ceramic)
+
+# Save effects in a vector, but remove intercept
+qef <- full$effects
+qef <- qef[-1]
+
+# Sort effects and save labels
+sef <- qef[order(qef)]
+qlab <- names(sef)
+
+# Leave off the two largest effects, Direction and Batch
+large <- c(1, 2)
+sef <- sef[-large]
+qlab <- qlab[-large]
+
+# Generate theoretical quantiles
+ip <- ppoints(length(sef))
+zp <- qnorm(ip)
+  
+# Generate normal probability plot of all effects (excluding the intercept)
+# Direction and batch are not shown
+# par(bg = rgb(1, 1, 0.8))
+plot(
+  x = zp, xlim = c(-2, 3), xlab = "Theoretical Quantiles",
+  y = sef, ylim = c(-120, 70), ylab = "Effect",
+  main="Normal Probability Plot of Saturated Model Effects"
+)
+qqline(sef, col = 2)
+abline(h = 0, col = 4)
+text(-2, 90, "Direction and Batch not shown", pos = 4)
+
+# Add labels for largest 10 effects (two are not shown)
+small <- c(6:(length(sef) - 3))
+small2 <- c((length(sef) - 4):(length(sef) - 3))
+text(zp[-small], sef[-small], label = qlab[-small], pos = 4, cex = 0.8)
+text(zp[small2], sef[small2], label = qlab[small2], pos = 2, cex = 0.8)
+
+# par(mfrow = c(1, 1))
+```
+
+**Normal plot of the 31 effects**
+
+Most of the effects cluster close to the center (zero) line and follow the fitted normal model straight line. The effects that appear to be above or below the line by more than a small amount are the same effects identified using the stepwise routine, with the exception of X1. Some analysts prefer to include a main effect term when it has several significant interactions even if the main effect term itself does not appear to be significant.
+
+*Model appears to account for most of the variability*
+
+At this stage, the model appears to account for most of the variability in the response, achieving an adjusted R2 of 0.982. All the main effects are significant, as are six 2-factor interactions and one 3-factor interaction. The only interaction that makes little physical sense is the " X4: Direction*X5: Batch" interaction - why would the response using one batch of material react differently when the batch is cut in a different direction as compared to another batch of the same formulation?
+
+However, before accepting any model, residuals need to be examined.
+
+## Step 4: Test the model assumptions using residual graphs (adjust and simplify as needed)
+
+*Plot of residuals versus predicted responses*
+
+First we look at the residuals plotted versus the predicted responses.
+
+```{r}
+# Plot residuals versus predicted response.
+# par(bg = rgb(1, 1, 0.8))
+plot(
+  x = predict(redmod), xlab = "Predicted Strength",
+  y = redmod$residuals, ylab = "Residual"
+)
+abline(h = 0)
+# par(mfrow=c(1, 1))
+```
+
+**Plot of residuals versus predicted response**
+
+The residuals appear to spread out more with larger values of predicted strength, which should not happen when there is a common variance.
+
+Next we examine the distribution of the residuals with a normal quantile plot, a box plot, a histogram, and a run-order plot.
+
+```{r, fig.width=8.5, fig.height=8.5}
+# Generate four plots.
+# par(mfrow = c(2, 2), bg = rgb(1, 1, 0.8))
+par(mfrow = c(2, 2))
+
+qqnorm(redmod$residuals)
+qqline(redmod$residuals, col = 2)
+abline(h = 0)
+
+boxplot(redmod$residuals, horizontal = TRUE, main = "Box Plot", xlab = "Residual")
+
+hist(redmod$residuals, main = "Histogram", xlab = "Residual")
+
+plot(
+  x = ceramic$order, xlab = "Actual Run Order",
+  y = redmod$residuals, ylab = "Residual",
+  main = "Run Order Plot"
+)
+
+par(mfrow = c(1, 1))
+```
+
+**Normal probability plot, box plot, and histogram of the residuals**
+
+None of these plots appear to show typical normal residuals and the boxplot indicates that there may be outliers.
+
+## Step 4 continued: Transform the data and fit the model again
+
+*Box-Cox Transformation*
+
+We next look at whether we can model a transformation of the response variable and obtain residuals with the assumed properties. We calculate an optimum Box-Cox transformation by finding the value of lambda that maximizes the negative log likelihood.
+
+```{r}
+# Find the optimal Box-Cox transformation based on the 12 term model.
+library(MASS)
+
+# par(bg=rgb(1,1,0.8))
+
+bc <- boxcox(strength ~ speed + rate + grit + direction + 
+             batch + speed:rate + speed:grit + speed:direction +  
+             rate:direction + grit:direction + direction:batch + 
+             speed:rate:direction, data = ceramic,
+             lambda = seq(-2, 2, length = 50))
+title("Box-Cox Transformation")
+```
+
+**Box-Cox transformation graph, optimal value at lambda = 0.2**
+
+```{r}
+lambda = bc$x[which.max(bc$y)]
+lambda # 0.2626263
+```
+
+```{r}
+# Use lambda = 0.2 to match output in the page.
+lambda = 0.2
+
+# par(mfrow=c(1,1))
+```
+
+The optimum is found at lambda = 0.2. A new Y: Strength variable is calculated using:
+
+**Box-Cox transformation** (add graphic or formula)
+
+*Fit model to transformed data*
+
+When the 12-effect model is fit to the transformed data, the "X4: Direction * X5: Batch" interaction term is no longer significant. The 11-effect model fit is shown below, with parameter estimates and p-values.
+
+*The fitted model after applying Box-Cox transformation*
+
+```{r}
+# The optimum is found at lambda = 0.26
+# A new variable, newstrength, is calculated and added to the data frame
+
+# Attach psych library to compute the geometric mean of strength.
+library(psych)
+
+# Generate new transformed response variable and add to data frame.
+newstrength <- (ceramic$strength^lambda - 1)/(lambda*(geometric.mean(ceramic$strength)^(lambda - 1)))
+
+# df =  data.frame(df,newstrength)
+ceramic$newstrength = newstrength
+
+# Fit 12-term model with transformed strength variable.
+summary(aov(formula = newstrength ~ speed + rate + grit + direction + 
+            batch + speed:rate + speed:grit + speed:direction +  
+            rate:direction + grit:direction + direction:batch + 
+            speed:rate:direction, data = ceramic))
+```
+
+```{r}
+# Add three-term interaction to data frame
+# srd = s*r*d
+# df = data.frame(df,srd)
+
+# Remove the direction:batch interaction since it's no longer significant
+# newredmod <- lm(formula = newstrength ~ s + r + sr +
+#                g + sg + d + ds + rd + srd + gd + b, data = df)
+newredmod <- lm(formula = newstrength ~ speed + rate + speed:rate +
+                grit + speed:grit + direction + direction:speed + rate:direction + speed:rate:direction + grit:direction + batch, data = ceramic)
+
+summary.lm(newredmod)
+```
+
+```
+    The 11-Effect Model Fit to Tranformed Response Data
+
+               Response:    Y:NewStrength
+
+                  Summary of Fit
+               RSquare 0.99041
+               RSquare Adj 0.985135
+         Root Mean Square Error 13.81065
+          Mean of Response 1917.115
+         Observations (or Sum Wgts) 32
+
+                       Parameter
+Effect                  Estimate         p-value
+Intercept               1917.115          <.0001
+X1: Table Speed            5.777          0.0282
+X2: Feed Rate             11.691          0.0001
+X1: Table Speed*         -14.467          <.0001
+    X2: Feed Rate
+X3: Wheel Grit           -21.649          <.0001
+X1: Table Speed*           7.339          0.007
+    X3: Wheel Grit
+X4: Direction            -99.272          <.0001
+X1: Table Speed*          -7.188          0.0080
+    X4: Direction
+X2: Feed Rate*            -9.160          0.0013
+    X4: Direction
+X1: Table Speed*          15.325          <.0001
+    X2: Feed Rate*
+    X4:Direction
+X3: Wheel Grit*           12.965          <.0001
+    X4: Direction
+X5: Batch                -31.871          <.0001
+```
+
+*Model has high R2*
+
+This model has a very large R2 and adjusted R2. The residual plots (shown below) are quite a bit better behaved than before
+
+*Residual plots from model with transformed response*
+
+The plot of the residuals versus the predicted values indicates that the transformation has resolved the problem of increasing variace with increasing strength.
+
+```{r}
+# Plot residuals versus predicted, transformed response.
+# par(mfrow=c(1,1),bg=rgb(1,1,0.8))
+plot(
+  x = predict(newredmod), xlab = "Predicted Transformed Strength",
+  y = newredmod$residuals, ylab = "Residual"
+)
+abline(h = 0)
+```
+
+**residual vs predicted**
+
+The normal probability plot, box plot, and the histogram of the residuals do not indicate any serious violations of the model assumptions:
+
+https://www.itl.nist.gov/div898/handbook/eda/section3/normprpl.htm
+
+https://www.itl.nist.gov/div898/handbook/eda/section3/boxplot.htm
+
+https://www.itl.nist.gov/div898/handbook/eda/section3/histogra.htm
+
+The run sequence plot of the residuals does not indicate any time dependent patterns.
+
+https://www.itl.nist.gov/div898/handbook/eda/section3/runseqpl.htm
+
+```{r}
+# Generate four plots of residuals based on transformed response.
+# par(mfrow=c(2, 2), bg = rgb(1, 1, 0.8))
+par(mfrow = c(2, 2))
+
+qqnorm(newredmod$residuals)
+qqline(newredmod$residuals, col = 2)
+abline(h = 0)
+
+boxplot(newredmod$residuals, horizontal = TRUE, main = "Box Plot", xlab = "Residual")
+
+hist(newredmod$residuals, main = "Histogram", xlab = "Residual")
+
+plot(
+  x = ceramic$order, xlab = "Actual Run Order",
+  y = newredmod$residuals, ylab = "Residual", 
+  main = "Run Order Plot"
+)
+
+par(mfrow = c(1, 1))
+```
+
+**Normal prob. plot, box plot, histogram, & run-order plot of residuals**
+
+## Step 5. Answer the questions in your experimental objectives
+
+*Important main effects and interaction effects*
+
+The magnitudes of the effect estimates show that "Direction" is by far the most important factor. "Batch" plays the next most critical role, followed by "Wheel Grit". Then, there are several important interactions followed by "Feed Rate". "Table Speed" plays a role in almost every significant interaction term, but is the least important main effect on its own. Note that large interactions can obscure main effects.
+
+*Plots of the main effects and significant 2-way interactions*
+
+Plots of the main effects and the significant 2-way interactions are shown below.
+
+```{r}
+# Rearrange data so that factors and levels are in single columns.
+n <- length(ceramic$strength[ceramic$batch == 1])
+k <- qt(0.975, n - 1)
+
+group <- rep(1:5, each = length(ceramic$strength))
+nstr <- rep(newstrength, 5)
+# level = c(m[ , 1], m[ , 2], m[ , 3], m[ , 4], m[ , 5])
+level <- c(ceramic$speed, ceramic$rate, ceramic$grit, ceramic$direction, ceramic$batch)
+dflong <- data.frame(group, level, nstr)
+
+gmn <- aggregate(x = dflong$nstr, by = list(dflong$group, dflong$level), FUN = "mean")
+gsd <- aggregate(x = dflong$nstr, by = list(dflong$group, dflong$level), FUN = "sd")
+cibar <- k*gsd[3]/sqrt(n)
+cgroup <- rep(c("Speed", "Rate", "Grit", "Direction", "Batch"), 2)
+
+dfp <- data.frame(cgroup, gmn, gsd[3], cibar)
+names(dfp) <- c("cgroup", "group", "level", "tmean", "std", "cibar")
+
+# Attach lattice library and generate main effects plot
+library(lattice)
+# par(mfrow = c(1, 1))
+xyplot(
+  tmean ~ level | cgroup,
+  data = dfp,
+  layout = c(5, 1),
+  xlim = c(-2, 2),
+  ylab = "Transformed Strength",
+  xlab = "Factor Levels", 
+  type = "b",
+  panel = function(x, y, ...) {
+    panel.xyplot(x, y, ...)
+    panel.abline(h = mean(newstrength), lty = 2, col = 2)
+  }
+)
+```
+
+**Plots of the main effects**
+
+```{r}
+# Generate two types of 2-way interaction plots
+
+# 2-way interaction plots showing overall effects
+group2 <- rep(1:10, each = length(ceramic$strength))
+nstr2 <- rep(ceramic$newstrength, 10)
+db <- ceramic$direction * ceramic$batch
+gd <- ceramic$grit * ceramic$direction
+gb <- ceramic$grit * ceramic$batch
+rg <- ceramic$rate * ceramic$grit
+rd <- ceramic$rate * ceramic$direction
+rb <- ceramic$rate * ceramic$batch
+sr <- ceramic$speed * ceramic$rate
+sg <- ceramic$speed * ceramic$grit
+ds <- ceramic$direction * ceramic$speed
+sb <- ceramic$speed * ceramic$batch
+level2 <- c(db, gd, gb, rg, rd, rb, sr, sg, ds, sb)
+df2way <- data.frame(group2, level2, nstr2)
+
+gmn2 <- aggregate(x = df2way$nstr2, by = list(df2way$group2, df2way$level2), FUN = "mean")
+gsd2 <- aggregate(x = df2way$nstr2, by = list(df2way$group2, df2way$level2), FUN = "sd")
+
+cgr2 <- rep(c("d*b","g*d","g*b","r*g","r*d","r*b","s*r","s*g","s*d","s*b"), 2)
+dfp2 <- data.frame(cgr2, gmn2, gsd2[3])
+names(dfp2) <- c("cgroup", "group", "level", "tmean", "std")
+
+# Generate plot
+sp <- c(T, T, T, F, T, T, F, F, T, F, F, F, F, F, F, F)
+strip.bg_custom <- trellis.par.get("strip.background")
+strip.bg_custom$col <- c("#cce6ff", "#ffe5cc", "#ccffcc", "#ccffff", "#ffccff", "#ffcccc", "#ffffcc")
+strip.sh_custom <- strip.bg_custom
+trellis.par.set("strip.background", strip.bg_custom)
+trellis.par.set("strip.shingle", strip.sh_custom)
+
+xyplot(
+  tmean ~ level | group, 
+  data = dfp2, 
+  type = "b", 
+  xlim = c(-2, 2),
+  layout = c(4, 4), 
+  skip = sp, 
+  col = c(4), 
+  ylim = c(1900, 1935),
+  strip = function(..., style, factor.levels, strip.levels, strip.names)
+  strip.default(
+    ..., 
+    style = 1, 
+    factor.levels = cgr2, 
+    strip.levels = c(F, T), 
+    strip.names = c(T, F)
+  ),
+  xlab = "Factor Level", 
+  ylab = "Transformed Strength",
+  panel = function(x, y, ...) {
+    panel.xyplot(x, y, ...)
+    panel.abline(h = mean(newstrength), lty = 2, col = 2)
+  }
+)
+```
+
+**Plots of significant 2-way interactions**
+
+Next, we plot 2-way interaction plot showing means for all combinations of levels for the two factors.
+
+```{r}
+# 2-way interaction plot showing means for all combinations of
+# levels for the two factors.
+
+# Compute means for plotting.
+dfi <- data.frame(
+  s = ceramic$speed, 
+  r = ceramic$rate, 
+  g = ceramic$grit,
+  d = ceramic$direction,
+  b = ceramic$batch,
+  newstrength = ceramic$newstrength
+)
+
+mnsr <- aggregate(x = dfi$newstrength, by = list(dfi$s, dfi$r), FUN = "mean")
+mnsg <- aggregate(x = dfi$newstrength, by = list(dfi$s, dfi$g), FUN = "mean")
+mnsd <- aggregate(x = dfi$newstrength, by = list(dfi$s, dfi$d), FUN = "mean")
+mnsb <- aggregate(x = dfi$newstrength, by = list(dfi$s, dfi$b), FUN ="mean")
+
+mnrs <- aggregate(x = dfi$newstrength, by = list(dfi$r, dfi$s), FUN = "mean")
+mnrg <- aggregate(x = dfi$newstrength, by = list(dfi$r, dfi$g), FUN = "mean")
+mnrd <- aggregate(x = dfi$newstrength, by = list(dfi$r, dfi$d), FUN = "mean")
+mnrb <- aggregate(x = dfi$newstrength, by = list(dfi$r, dfi$b), FUN = "mean")
+
+mngs <- aggregate(x = dfi$newstrength, by = list(dfi$g, dfi$s), FUN = "mean")
+mngr <- aggregate(x = dfi$newstrength, by = list(dfi$g, dfi$r), FUN = "mean")
+mngd <- aggregate(x = dfi$newstrength, by = list(dfi$g, dfi$d), FUN = "mean")
+mngb <- aggregate(x = dfi$newstrength, by = list(dfi$g, dfi$b), FUN = "mean")
+
+mnds <- aggregate(x = dfi$newstrength, by = list(dfi$d, dfi$s), FUN = "mean")
+mndr <- aggregate(x=dfi$newstrength,by=list(dfi$d,dfi$r),FUN="mean")
+mndg <- aggregate(x=dfi$newstrength,by=list(dfi$d,dfi$g),FUN="mean")
+mndb <- aggregate(x=dfi$newstrength,by=list(dfi$d,dfi$b),FUN="mean")
+
+mnbs <- aggregate(x=dfi$newstrength,by=list(dfi$b,dfi$s),FUN="mean")
+mnbr <- aggregate(x=dfi$newstrength,by=list(dfi$b,dfi$r),FUN="mean")
+mnbg <- aggregate(x=dfi$newstrength,by=list(dfi$b,dfi$g),FUN="mean")
+mnbd <- aggregate(x=dfi$newstrength,by=list(dfi$b,dfi$d),FUN="mean")
+
+xcol <- rbind(
+  mnbs, mnbr, mnbg, mnbd,
+  mnds, mndr, mndg, mndb,
+  mngs, mngr, mngd, mngb,
+  mnrs, mnrg, mnrd, mnrb,
+  mnsr, mnsg, mnsd, mnsb
+)
+
+gi <- rep(c("b*s", "b*r", "b*g", "b*d",
+            "d*s", "d*r", "d*g", "d*b",
+            "g*s", "g*r", "g*d", "g*b",
+            "r*s", "r*g", "r*d", "r*b",
+            "s*r", "s*g", "s*d", "s*b"), each = 4)
+
+dff <- data.frame(gi, xcol)
+
+  ## Generate the lattice plot.
+  sp <- c(T,F,F,F,F, F,T,F,F,F, F,F,T,F,F, F,F,F,T,F, F,F,F,F,T)
+  xyplot(x ~ Group.1 | gi, data=dff, group=Group.2,
+         layout=c(5,5), skip=sp, xlim=c(-2,2),
+         ylab = "Transformed Strength", xlab = "Factor Level",
+         main = "Blue: low level, Pink: high level",
+         type=c("p","l"), pch=20, cex=1, col=c(4,6),
+         panel=function(x,y,...){panel.superpose(x,y,...)})
+  trellis.focus("toplevel") ## has coordinate system [0,1] x [0,1]
+  panel.text(0.200, 0.200, "Batch",     cex=1)
+  panel.text(0.365, 0.365, "Direction", cex=1)
+  panel.text(0.515, 0.515, "Grit",      cex=1)
+  panel.text(0.675, 0.675, "Rate",      cex=1)
+  panel.text(0.825, 0.825, "Speed",     cex=1)
+  trellis.unfocus()
+```
+
+**Plots of significant 2-way interactions**
+
+The labels located in the diagonal spaces of the plot grid have two purposes. First, the label indicates the factor associated with the x-axis for all plots in the same row. Second, the label indicates the factor defining the two lines for plots in the same column.
+
+For example, the plot labeled `r*s` contains averages for low and high levels of the rate variable (x-axis) for both levels of speed. The blue line represents the low level of speed and the pink line represents the high level of speed. The two lines in the `r*s` plot cross, indicating that there is interaction between rate and speed. Parallel lines indicate that there is no interaction between the two factors.
+
+*Optimal Settings*
+
+Based on the analyses, we can select factor settings that maximize ceramic strength. Translating from "-1" and "+1" back to the actual factor settings, we have: Table speed at "1" or .125m/s; Down Feed Rate at "1" or .125 mm; Wheel Grit at "-1" or 140/170; and Direction at "-1" or longitudinal.
+
+Unfortunately, "Batch" is also a very significant factor, with the first batch giving higher strengths than the second. Unless it is possible to learn what worked well with this batch, and how to repeat it, not much can be done about this factor.
+
+## Comments
+
+*Analyses with value of Direction fixed indicates complex model is needed only for transverse cut*
+
+One might ask what an analysis of just the 2^4 factorial with "Direction" kept at -1 (i.e., longitudinal) would yield. This analysis turns out to have a very simple model; only "Wheel Grit" and "Batch" are significant main effects and no interactions are significant.
+
+If, on the other hand, we do an analysis of the 2^4 factorial with "Direction" kept at +1 (i.e., transverse), then we obtain a 7-parameter model with all the main effects and interactions we saw in the 2^5 analysis, except, of course, any terms involving "Direction".
+
+So it appears that the complex model of the full analysis came from the physical properties of a transverse cut, and these complexities are not present for longitudinal cuts. 
+
+*Half fraction design*
+
+If we had assumed that three-factor and higher interactions were negligible before experimenting, a 2_V^(5−1) half fraction design might have been chosen. In hindsight, we would have obtained valid estimates for all main effects and two-factor interactions except for X3 and X5, which would have been aliased with X1*X2*X4 in that half fraction. 
+
+*Natural log transformation*
+
+Finally, we note that many analysts might prefer to adopt a natural logarithm transformation (i.e., use ln(Y)) as the response instead of using a Box-Cox transformation with an exponent of 0.2. The natural logarithm transformation corresponds to an exponent of λ = 0 in the Box-Cox graph.
