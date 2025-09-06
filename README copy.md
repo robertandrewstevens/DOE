@@ -1,2 +1,0 @@
-# DOE
-Design of Experiments
